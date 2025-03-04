@@ -5,7 +5,16 @@ import styles from './styles.module.css';
 import { GetServerSideProps } from 'next';
 
 import { db } from '../../services/firebaseConnection';
-import { doc, collection, query, where, getDoc, addDoc, getDocs } from 'firebase/firestore';
+import {
+  doc,
+  collection,
+  query,
+  where,
+  getDoc,
+  addDoc,
+  getDocs,
+  deleteDoc,
+} from 'firebase/firestore';
 import { userAgent } from 'next/server';
 import { Textarea } from '@/components/textarea';
 import { FaTrash } from 'react-icons/fa';
@@ -68,6 +77,19 @@ export default function Task({ item, allComments }: TaskProps) {
     }
   }
 
+  async function handleDeleteComment(id: string) {
+    try {
+      const docRef = doc(db, 'comments', id);
+      await deleteDoc(docRef);
+
+      const deletComment = comments.filter((item) => item.id !== id);
+
+      setComments(deletComment);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -103,7 +125,7 @@ export default function Task({ item, allComments }: TaskProps) {
             <div className={styles.headComment}>
               <label className={styles.commentsLabel}>{item.name}</label>
               {item.user === session?.user?.email && (
-                <button className={styles.buttonTrash}>
+                <button className={styles.buttonTrash} onClick={() => handleDeleteComment(item.id)}>
                   <FaTrash size={18} color="#EA3140" />
                 </button>
               )}
